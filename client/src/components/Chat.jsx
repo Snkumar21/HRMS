@@ -312,6 +312,25 @@ const Chat = ({ user }) => {
         {/* Header */}
         <div className="p-4 border-b border-gray-200 bg-white">
           <h2 className="text-xl font-semibold text-gray-800">Chat</h2>
+          
+          {/* Navigation */}
+          <div className="w-60 border-l border-gray-200 bg-gray-50 p-4">
+            <h4 className="font-semibold text-gray-700 mb-4">Quick Actions</h4>
+            <ul className="space-y-3">
+              <li className="cursor-pointer text-cyan-600 hover:underline"
+                  onClick={() => alert("Unread messages feature coming soon!")}>
+                📩 Unread Messages
+              </li>
+              <li className="cursor-pointer text-cyan-600 hover:underline"
+                  onClick={() => alert("Group listing coming soon!")}>
+                👥 Groups
+              </li>
+              <li className="cursor-pointer text-cyan-600 hover:underline"
+                  onClick={() => alert("Drafts functionality coming soon!")}>
+                📝 Drafts
+              </li>
+            </ul>
+          </div>
         </div>
 
         {/* Global Chat */}
@@ -423,9 +442,25 @@ const Chat = ({ user }) => {
                   <h3 className="font-semibold text-lg text-gray-800">Global Chat</h3>
                   <p className="text-sm text-gray-500">Everyone can see these messages</p>
                 </div>
+                <div className="ml-auto flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      const confirmed = window.confirm("Are you sure you want to delete all messages?");
+                      if (confirmed) {
+                        axios.delete('http://localhost:5000/api/chat/messages/clear', { withCredentials: true })
+                          .then(() => setMessages([]))
+                          .catch(err => console.error("Failed to clear messages:", err));
+                      }
+                    }}
+                    className="text-sm text-red-500 hover:underline"
+                  >
+                    Clear All
+                  </button>
+                </div>
               </>
             )}
 
+            {/* Private Chats Section */}
             {selectedChat.type === 'private' && selectedChat.user && (
               <>
                 <img
@@ -437,6 +472,18 @@ const Chat = ({ user }) => {
                   <h3 className="font-semibold text-lg text-gray-800">{selectedChat.user.name}</h3>
                   <p className="text-sm text-gray-500">Private conversation</p>
                 </div>
+                <button
+                  className="ml-2 text-xs text-red-400 hover:text-red-600"
+                  onClick={() => {
+                    axios.delete(`http://localhost:5000/api/chat/messages/${message._id}`, {
+                      withCredentials: true
+                    }).then(() => {
+                      setMessages(prev => prev.filter(m => m._id !== message._id));
+                    }).catch(err => console.error("Failed to delete message:", err));
+                  }}
+                >Clear
+                  <i className="fas fa-trash-alt"></i>
+                </button>
               </>
             )}
 
@@ -533,6 +580,50 @@ const Chat = ({ user }) => {
               onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
             />
+            {/* 📎 Attachment */}
+            <label className="cursor-pointer">
+              <i className="fas fa-paperclip text-gray-500 hover:text-cyan-600 text-xl"></i>
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    const formData = new FormData();
+                    formData.append("file", file);
+                    formData.append("senderId", getUserId());
+                    formData.append("chatScope", selectedChat.type);
+
+                    if (selectedChat.type === "private") {
+                      formData.append("receiverId", selectedChat.user._id);
+                    } else if (selectedChat.type === "room") {
+                      formData.append("chatRoomId", selectedChat.room._id);
+                    }
+
+                    axios.post("http://localhost:5000/api/chat/messages/file", formData, {
+                      withCredentials: true,
+                    }).then((res) => {
+                      if (res.data.success) {
+                        const fileMessage = res.data.data;
+                        if (selectedChat.type === 'global') {
+                          setMessages(prev => [...prev, fileMessage]);
+                        } else if (selectedChat.type === 'private') {
+                          setPrivateMessages(prev => ({
+                            ...prev,
+                            [selectedChat.user._id]: [...(prev[selectedChat.user._id] || []), fileMessage]
+                          }));
+                        } else if (selectedChat.type === 'room') {
+                          setRoomMessages(prev => ({
+                            ...prev,
+                            [selectedChat.room._id]: [...(prev[selectedChat.room._id] || []), fileMessage]
+                          }));
+                        }
+                      }
+                    }).catch(console.error);
+                  }
+                }}
+              />
+            </label>
             <button
               onClick={sendMessage}
               disabled={!newMessage.trim()}

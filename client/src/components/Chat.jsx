@@ -306,7 +306,7 @@ const Chat = ({ user }) => {
   };
 
   return (
-    <div className="flex h-[90vh] border border-gray-300 rounded-lg overflow-hidden bg-white shadow-lg">
+    <div className="flex h-[100vh] border border-gray-300 rounded-lg overflow-hidden bg-white shadow-lg">
       {/* Sidebar */}
       <div className="w-[320px] border-r border-gray-200 bg-gray-50 flex flex-col">
         {/* Header */}
@@ -582,7 +582,7 @@ const Chat = ({ user }) => {
             />
             {/* 📎 Attachment */}
             <label className="cursor-pointer">
-              <i className="fas fa-paperclip text-gray-500 hover:text-cyan-600 text-xl"></i>
+              📎
               <input
                 type="file"
                 className="hidden"

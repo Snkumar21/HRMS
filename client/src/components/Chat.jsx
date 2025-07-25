@@ -17,6 +17,7 @@ const Chat = ({ user }) => {
   const [typingUsers, setTypingUsers] = useState([]);
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+  const [showFabMenu, setShowFabMenu] = useState(false);
 
   // Debug: Check if user is passed correctly
   console.log('Chat component user:', user);
@@ -311,26 +312,28 @@ const Chat = ({ user }) => {
       <div className="w-[320px] border-r border-gray-200 bg-gray-50 flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-gray-200 bg-white">
-          <h2 className="text-xl font-semibold text-gray-800">Chat</h2>
+          <h2 className="text-xl font-semibold text-gray-800 pt-2">Chat</h2>
           
           {/* Navigation */}
-          <div className="w-60 border-l border-gray-200 bg-gray-50 p-4">
-            <h4 className="font-semibold text-gray-700 mb-4">Quick Actions</h4>
-            <ul className="space-y-3">
-              <li className="cursor-pointer text-cyan-600 hover:underline"
-                  onClick={() => alert("Unread messages feature coming soon!")}>
-                📩 Unread Messages
-              </li>
-              <li className="cursor-pointer text-cyan-600 hover:underline"
-                  onClick={() => alert("Group listing coming soon!")}>
-                👥 Groups
-              </li>
-              <li className="cursor-pointer text-cyan-600 hover:underline"
-                  onClick={() => alert("Drafts functionality coming soon!")}>
-                📝 Drafts
-              </li>
-            </ul>
+          <div className="ml-60 -mt-10 bottom-6 right-6 z-50">
+            <button
+              className="bg-cyan-500 text-white w-14 h-14 rounded-full shadow-lg hover:bg-cyan-600 flex items-center justify-center text-2xl"
+              onClick={() => setShowFabMenu(!showFabMenu)}
+            >
+              ☰
+            </button>
+
+            {showFabMenu && (
+              <div className="absolute mr-242 mt-2 right-0 bg-white rounded-md shadow-lg border">
+                <ul className="text-sm font-medium">
+                  <li onClick={() => alert("Show Unread Messages")} className="p-3 hover:bg-gray-100 cursor-pointer">📩 Unread</li>
+                  <li onClick={() => alert("Show Group Chats")} className="p-3 hover:bg-gray-100 cursor-pointer">👥 Groups</li>
+                  <li onClick={() => alert("Show Drafts")} className="p-3 hover:bg-gray-100 cursor-pointer">📝 Drafts</li>
+                </ul>
+              </div>
+            )}
           </div>
+        
         </div>
 
         {/* Global Chat */}

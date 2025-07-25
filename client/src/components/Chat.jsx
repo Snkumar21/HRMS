@@ -478,11 +478,17 @@ const Chat = ({ user }) => {
                 <button
                   className="ml-2 text-xs text-red-400 hover:text-red-600"
                   onClick={() => {
-                    axios.delete(`http://localhost:5000/api/chat/messages/${message._id}`, {
-                      withCredentials: true
-                    }).then(() => {
-                      setMessages(prev => prev.filter(m => m._id !== message._id));
-                    }).catch(err => console.error("Failed to delete message:", err));
+                    const confirmed = window.confirm("Are you sure you want to clear all private messages with this user?");
+                    if (confirmed) {
+                      axios.delete(`http://localhost:5000/api/chat/messages/private/${selectedChat.user._id}?currentUserId=${getUserId()}`, {
+                        withCredentials: true
+                      }).then(() => {
+                        setPrivateMessages(prev => ({
+                          ...prev,
+                          [selectedChat.user._id]: []
+                        }));
+                      }).catch(err => console.error("Failed to clear private messages:", err));
+                    }
                   }}
                 >Clear
                   <i className="fas fa-trash-alt"></i>

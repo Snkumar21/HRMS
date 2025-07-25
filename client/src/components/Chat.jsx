@@ -23,21 +23,15 @@ const Chat = ({ user }) => {
   console.log('Chat component user:', user);
 
   // Get user ID (handle both employeeId and _id)
-  const getUserId = () => user?.employeeId || user?._id;
-
-  // Early return if no user
-  if (!user) {
-    return (
-      <div className="flex h-[90vh] items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-500">Loading user information...</p>
-        </div>
-      </div>
-    );
-  }
+  const getUserId = React.useCallback(() => user?.employeeId || user?._id, [user]);
 
   // Initialize socket connection
   useEffect(() => {
+    // Always call the hook, handle conditional logic inside
+    if (!user) {
+      return;
+    }
+
     const userId = getUserId();
     if (!userId) {
       console.log('No user ID found:', user);
@@ -113,14 +107,26 @@ const Chat = ({ user }) => {
     return () => {
       newSocket.disconnect();
     };
-  }, [user]);
+  }, [user, getUserId]);
 
   // Load initial data
   useEffect(() => {
+    if (!user) return;
     loadMessages();
     loadUsers();
     loadChatRooms();
-  }, []);
+  }, [user]);
+
+  // Early return if no user
+  if (!user) {
+    return (
+      <div className="flex h-[90vh] items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-500">Loading user information...</p>
+        </div>
+      </div>
+    );
+  }
 
   // Auto scroll to bottom
   const scrollToBottom = () => {
